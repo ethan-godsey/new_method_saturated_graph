@@ -183,7 +183,19 @@ B.addEdge(6,12)
 B.addEdge(6,13)
 B.addEdge(7,14)
 B.addEdge(7,15)
-    
+
+NonBipartite = Graph()
+for i in range(7):
+    NonBipartite.addVertex(i)
+NonBipartite.addEdge(1, 2)
+NonBipartite.addEdge(2, 6)
+NonBipartite.addEdge(6, 7)
+NonBipartite.addEdge(7, 4)
+NonBipartite.addEdge(7, 2)
+NonBipartite.addEdge(6, 4)
+NonBipartite.addEdge(3, 2)
+NonBipartite.addEdge(3, 4)
+NonBipartite.addEdge(4, 5)
 
 
 def new_saturated_method(graph: Graph):
@@ -205,21 +217,36 @@ def new_saturated_method(graph: Graph):
     
     # add edge for lowest degree neighbor, if multiple neighbors with same degree, pick lowest numbered vertex
     neighbor_degree = len(graph.vertList) + 1
-
-    for neighbor in working_vertex.adj:
-        if len(neighbor.adj) < neighbor_degree:
-            lowest_deg = neighbor
+    try:
+        for neighbor in working_vertex.adj:
+            if len(neighbor.adj) < neighbor_degree:
+                lowest_deg = neighbor
+    
+    except UnboundLocalError:
+        print(max_saturation)
+        return max_saturation
         
-    print(lowest_deg)
+    
     max_saturation.append('(' + str(working_vertex.id) + ',' + str(lowest_deg.id) + ')')
 
     # Remove 2 saturated verticies from viable verticies list, and decrease the degree of the neighbors by 1
-    graph.delVertex(int(str(working_vertex)))
-    graph.delVertex(int(str(lowest_deg)))
+    for vert in working_vertex.adj:
+        for neighbor in vert.adj:
+            if neighbor.id == working_vertex.id:
+                vert.adj.remove(working_vertex)
+
+    for vert in lowest_deg.adj:
+        for neighbor in vert.adj:
+            if neighbor.id == lowest_deg.id:
+                vert.adj.remove(lowest_deg)
+
+    del graph.vertList[working_vertex.id]
+    del graph.vertList[lowest_deg.id]
+
+
 
     #repeat process for next lowest degreed vertex
-    new_saturated_method(graph)
+    print(new_saturated_method(graph))
+    print(max_saturation)
 
-    return max_saturation
-
-new_saturated_method(B)
+new_saturated_method(NonBipartite)
